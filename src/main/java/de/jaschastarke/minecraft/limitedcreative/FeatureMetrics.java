@@ -10,14 +10,13 @@ import de.jaschastarke.bukkit.tools.stats.PiwikStatistics;
 import de.jaschastarke.modularize.IModule;
 import de.jaschastarke.modularize.ModuleEntry;
 import de.jaschastarke.modularize.ModuleEntry.ModuleState;
-import org.mcstats.Metrics;
 
 public class FeatureMetrics extends CoreModule<LimitedCreative> implements Listener {
     public FeatureMetrics(LimitedCreative plugin) {
         super(plugin);
     }
     private IStatistics metric;
-    private Metrics mcstats = null;
+    private MCStatsMetrics mcstats = null;
     
     @Override
     public void onEnable() {
@@ -25,12 +24,12 @@ public class FeatureMetrics extends CoreModule<LimitedCreative> implements Liste
         metric = new PiwikStatistics(plugin);
         if (mcstats == null) {
             try {
-                mcstats = new Metrics(plugin);
-                
-                Metrics.Graph moduleGraph = mcstats.createGraph("Module Usage");
+                mcstats = new MCStatsMetrics(plugin);
+
+                MCStatsMetrics.Graph moduleGraph = mcstats.createGraph("Module Usage");
                 for (final ModuleEntry<IModule> mod : plugin.getModules()) {
                     if (mod.getModule() instanceof CoreModule<?>) {
-                        moduleGraph.addPlotter(new Metrics.Plotter(((CoreModule<?>) mod.getModule()).getName()) {
+                        moduleGraph.addPlotter(new MCStatsMetrics.Plotter(((CoreModule<?>) mod.getModule()).getName()) {
                             @Override
                             public int getValue() {
                                 return mod.getState() == ModuleState.ENABLED ? 1 : 0;
@@ -38,9 +37,9 @@ public class FeatureMetrics extends CoreModule<LimitedCreative> implements Liste
                         });
                     }
                 }
-                Metrics.Graph depGraph = mcstats.createGraph("Dependencies");
+                MCStatsMetrics.Graph depGraph = mcstats.createGraph("Dependencies");
                 for (final String dep : plugin.getDescription().getSoftDepend()) {
-                    depGraph.addPlotter(new Metrics.Plotter(dep) {
+                    depGraph.addPlotter(new MCStatsMetrics.Plotter(dep) {
                         @Override
                         public int getValue() {
                             return plugin.getServer().getPluginManager().isPluginEnabled(dep) ? 1 : 0;

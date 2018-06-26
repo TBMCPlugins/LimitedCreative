@@ -39,15 +39,7 @@ public class ThreadLink {
         /*
          * In theory we could add multiple threads, e.g. 1 write and 2 read threads.
          */
-        thread = new DBThread(queries);
-        thread.setName("LC BlockState DB-Thread");
-        thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread thread, Throwable e) {
-                e.printStackTrace();
-                log.severe("Thread " + thread.getName() + " encoutered an uncaught Exception: " + e.getMessage());
-            }
-        });
+        createThread(queries);
     }
     
     private class DBThread extends Thread {
@@ -62,6 +54,8 @@ public class ThreadLink {
             lastTimeout = System.currentTimeMillis() + STARTUP_TIMING;
             while (!shutdown || !updateQueue.isEmpty()) {
                 try {
+                    //Thread.sleep(1000);
+                    //throw new RuntimeException("Test exception pls ignore");
                     List<Action> acts = new LinkedList<Action>();
                     synchronized (updateQueue) {
                         while (updateQueue.isEmpty() && !shutdown)
@@ -120,6 +114,7 @@ public class ThreadLink {
     
     
     public void queueUpdate(Block block) {
+        restartThreadIfNeeded();
         long l = System.currentTimeMillis();
         synchronized (updateQueue) {
             updateQueue.add(new UpdateBlockStateAction(block));
@@ -132,6 +127,7 @@ public class ThreadLink {
     }
     
     public BlockState callUpdate(Block block) {
+        restartThreadIfNeeded();
         FetchBlockStateAction action = new FetchBlockStateAction(block);
         synchronized (updateQueue) {
             updateQueue.push(action);
@@ -141,12 +137,14 @@ public class ThreadLink {
     }
     
     public void queue(Action act) {
+        restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(act);
             updateQueue.notify();
         }
     }
     public <T> T call(CallableAction<T> act) {
+        restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.push(act);
             updateQueue.notify();
@@ -164,6 +162,7 @@ public class ThreadLink {
     }
 
     public void queueMetaMove(Location from, Location to) {
+        restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(new MoveBlockStateAction(from, to));
             updateQueue.notify();
@@ -171,6 +170,7 @@ public class ThreadLink {
     }
 
     public void queueChunkLoad(Chunk chunk) {
+        restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(new CacheChunkAction(chunk));
             updateQueue.notify();
@@ -178,6 +178,7 @@ public class ThreadLink {
     }
 
     public void queueTransaction(Transaction transaction) {
+        restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(transaction);
             updateQueue.notify();
@@ -185,6 +186,7 @@ public class ThreadLink {
     }
 
     public void shutdown() throws InterruptedException {
+        restartThreadIfNeeded();
         synchronized (updateQueue) {
             shutdown = true;
             updateQueue.notify();
@@ -208,5 +210,25 @@ public class ThreadLink {
     
     public ModuleLogger getLog() {
         return log;
+    }
+
+    private void restartThreadIfNeeded() {
+        if(thread.isAlive())
+            return;
+        log.warn("Thread is dead, restarting!");
+        createThread(((DBThread) thread).q);
+        start();
+    }
+
+    private void createThread(DBQueries queries) {
+        thread = new DBThread(queries);
+        thread.setName("LC BlockState DB-Thread");
+        thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread thread, Throwable e) {
+                e.printStackTrace();
+                log.severe("Thread " + thread.getName() + " encoutered an uncaught Exception: " + e.getMessage());
+            }
+        });
     }
 }
