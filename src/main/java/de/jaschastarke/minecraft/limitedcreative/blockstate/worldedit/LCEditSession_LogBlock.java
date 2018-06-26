@@ -10,11 +10,10 @@ import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.regions.Region;
 
 import de.diddiz.LogBlock.LogBlock;
-import de.diddiz.worldedit.LogBlockEditSession;
 import de.jaschastarke.minecraft.limitedcreative.blockstate.DBModel.DBTransaction;
 
-public class LCEditSession_LogBlock extends LogBlockEditSession {
-    private LCEditSessionFactory factory;
+public class LCEditSession_LogBlock { //The superclass got deleted at: https://github.com/LogBlock/LogBlock/commit/fa1e1b777a9da062d10d7c3c1906520e4d39eba8
+/*    private LCEditSessionFactory factory;
     private LocalPlayer player;
 
     public LCEditSession_LogBlock(LCEditSessionFactory factory, LocalWorld world, int maxBlocks, BlockBag blockBag, LocalPlayer player) {
@@ -94,5 +93,5 @@ public class LCEditSession_LogBlock extends LogBlockEditSession {
             }
         }
         return success;
-    }
+    }*/
 }

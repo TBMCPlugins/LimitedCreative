@@ -224,8 +224,8 @@ public class PlayerListener implements Listener {
             EntityDamageByEntityEvent event = (EntityDamageByEntityEvent) rawevent;
             
             Entity source = event.getDamager();
-            if (source instanceof Projectile)
-                source = ((Projectile) source).getShooter();
+            if (source instanceof Projectile && ((Projectile) source).getShooter() instanceof Entity)
+                source = (Entity) ((Projectile) source).getShooter();
             
             if (source instanceof Player) {
                 Player player = (Player) source;

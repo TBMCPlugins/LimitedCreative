@@ -8,7 +8,7 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <plib.version>1.4-SNAPSHOT</plib.version>
+    <plib.version>1.7.0</plib.version>
     <bukkit.version>1.7.2-R0.1-SNAPSHOT</bukkit.version>
   </properties>
   
@@ -43,8 +43,8 @@
     
     <!-- Official (Craft-)Bukkit repository -->
     <repository>
-      <id>bukkit-repo</id>
-      <url>http://repo.bukkit.org/content/groups/public</url>
+      <id>spigot-repo</id>
+      <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <!-- Official WorldGuard and WorldEdit repository -->
     <repository>
@@ -67,6 +67,13 @@
         <url>http://repo.md-5.net/content/groups/public/</url>
     </repository>
   </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>de-jas-rep</id>
+            <url>http://repo.ja-s.de/mvn</url>
+        </pluginRepository>
+    </pluginRepositories>
   
   <dependencies>
     <dependency>
@@ -84,7 +91,7 @@
         <!-- http://dev.bukkit.org/server-mods/worldguard/ -->
         <groupId>com.sk89q</groupId>
         <artifactId>worldguard</artifactId>
-        <version>5.8-SNAPSHOT</version>
+        <version>6.1</version>
     </dependency>
     <dependency>
         <!-- http://dev.bukkit.org/server-mods/authme-reloaded/ -->
@@ -127,6 +134,12 @@
         <groupId>net.coreprotect</groupId>
         <artifactId>coreprotect</artifactId>
         <version>2.0.8</version>
+    </dependency>
+      <!-- https://mvnrepository.com/artifact/org.mcstats/metrics -->
+    <dependency>
+        <groupId>org.mcstats</groupId>
+        <artifactId>metrics</artifactId>
+        <version>R6</version>
     </dependency>
   </dependencies>
   
