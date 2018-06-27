@@ -9,7 +9,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <plib.version>1.7.0</plib.version>
-    <bukkit.version>1.7.2-R0.1-SNAPSHOT</bukkit.version>
+    <bukkit.version>1.9.4-R0.1-SNAPSHOT</bukkit.version>
   </properties>
   
   <scm>
@@ -74,7 +74,7 @@
             <url>http://repo.ja-s.de/mvn</url>
         </pluginRepository>
     </pluginRepositories>
-  
+
   <dependencies>
     <dependency>
         <groupId>de.jaschastarke</groupId>
@@ -122,12 +122,6 @@
         <groupId>com.cypherx</groupId>
         <artifactId>xauth</artifactId>
         <version>2.0.26</version>
-    </dependency>
-    <dependency>
-        <!-- http://dev.bukkit.org/bukkit-plugins/logblock/ -->
-        <groupId>de.diddiz</groupId>
-        <artifactId>logblock</artifactId>
-        <version>dev-SNAPSHOT</version>
     </dependency>
     <dependency>
         <!-- http://dev.bukkit.org/bukkit-plugins/coreprotect/ -->
@@ -178,7 +172,6 @@
                 <param>MultiInv</param>
                 <param>Multiverse-Inventories</param>
                 <param>Vault</param>
-                <param>LogBlock</param>
                 <param>CoreProtect</param>
               </softdepend>
               <custom>
@@ -256,7 +249,7 @@
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
          <artifactId>wagon-ssh</artifactId>
-         <version>1.0</version>
+         <version>2.1</version>
       </extension>
     </extensions>
   </build>

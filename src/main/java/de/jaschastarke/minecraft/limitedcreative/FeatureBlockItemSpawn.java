@@ -4,17 +4,16 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import de.jaschastarke.bukkit.lib.CoreModule;
 
@@ -47,10 +46,10 @@ public class FeatureBlockItemSpawn extends CoreModule<LimitedCreative> implement
     private void scheduleCleanUp() {
         if (cleanup.maxTime == 0) { // if not scheduled yet
             cleanup.maxTime = System.currentTimeMillis();
-            plugin.getServer().getScheduler().runTaskLater(plugin, cleanup, TICK_OFFSET);
+            Bukkit.getScheduler().runTaskLater(plugin, cleanup, TICK_OFFSET);
         }
     }
-    
+
     private class BlockItemDrop {
         public BlockItemDrop(Location l, Material type) {
             this.l = l;
@@ -75,11 +74,11 @@ public class FeatureBlockItemSpawn extends CoreModule<LimitedCreative> implement
     }
     
     public void block(Block block, Player player) {
-        if (player.getItemInHand().containsEnchantment(Enchantment.SILK_TOUCH)) {
+        if (player.getInventory().getItemInMainHand().containsEnchantment(Enchantment.SILK_TOUCH)) {
             block(block.getLocation(), block.getType());
         } else {
             // doesn't include silktouch
-            for (ItemStack i : block.getDrops(player.getItemInHand())) {
+            for (ItemStack i : block.getDrops(player.getInventory().getItemInMainHand())) {
                 block(block.getLocation(), i.getType());
             }
         }
@@ -96,11 +95,15 @@ public class FeatureBlockItemSpawn extends CoreModule<LimitedCreative> implement
         list.add(new BlockItemDrop(l, type));
         scheduleCleanUp();
     }
+    public void block(Location l, ItemStack item) {
+        if (item != null)
+            block(l, item.getType());
+    }
     
     @EventHandler(ignoreCancelled = true)
     public void onItemSpawn(ItemSpawnEvent event) {
-        if (event.getEntity() instanceof Item) {
-            if (this.isBlocked(event.getLocation().getBlock().getLocation(), ((Item) event.getEntity()).getItemStack().getType())) {
+        if (event.getEntity() != null) {
+            if (this.isBlocked(event.getLocation().getBlock().getLocation(), event.getEntity().getItemStack().getType())) {
                 event.setCancelled(true);
             }
         }
@@ -113,8 +116,9 @@ public class FeatureBlockItemSpawn extends CoreModule<LimitedCreative> implement
         return debug;
     }
     
-    private class CleanUp extends BukkitRunnable {
+    private class CleanUp implements Runnable {
         public long maxTime = 0;
+
         @Override
         public void run() {
             if (plugin.isDebug())

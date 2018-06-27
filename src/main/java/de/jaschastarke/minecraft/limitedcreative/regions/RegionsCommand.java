@@ -138,7 +138,7 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
             if (idx > -1 && context.getArgument(idx) != null)
                 w = Bukkit.getWorld(context.getArgument(idx));
             if (w != null) {
-                RegionManager mgr = getWorldGuard().getGlobalRegionManager().get(w);
+                RegionManager mgr = getWorldGuard().getRegionManager(w);
                 if (mgr != null) {
                     List<String> hints = new ArrayList<String>();
                     for (String rId : mgr.getRegions().keySet()) {
@@ -174,7 +174,7 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
         if (w == null)
             throw new CommandException(L("command.worldguard.world_not_found"));
         
-        RegionManager mgr = getWorldGuard().getGlobalRegionManager().get(w);
+        RegionManager mgr = getWorldGuard().getRegionManager(w);
         ProtectedRegion region = mgr.getRegion(params.getArgument(0));
         if (region == null && params.getArgument(0).equalsIgnoreCase("__global__")) {
             region = new GlobalProtectedRegion(params.getArgument(0));
@@ -247,7 +247,7 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
             }
         } else {
             int rpc = params.getArgumentCount() > 1 ? 1 : 0;
-            RegionManager mgr = getWorldGuard().getGlobalRegionManager().get(w);
+            RegionManager mgr = getWorldGuard().getRegionManager(w);
             region = mgr.getRegion(params.getArgument(rpc));
             if (region == null && params.getArgument(rpc).equalsIgnoreCase(GLOBAL_REGION)) {
                 region = new GlobalProtectedRegion(params.getArgument(rpc));

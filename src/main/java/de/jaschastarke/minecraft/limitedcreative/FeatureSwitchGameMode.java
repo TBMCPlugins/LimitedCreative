@@ -69,6 +69,7 @@ public class FeatureSwitchGameMode extends CoreModule<LimitedCreative> {
             return SwitchGameModePermissions.ALL.getPermission(subPerm);
         }
         
+        @SuppressWarnings("deprecation")
         protected boolean changeGameMode(CommandContext context, String player, GameMode tgm, IAbstractPermission permission) throws MissingPermissionCommandException, CommandException {
             Player target = null;
             if (player != null && !player.isEmpty()) {
@@ -136,6 +137,14 @@ public class FeatureSwitchGameMode extends CoreModule<LimitedCreative> {
         @Usages("[player]")
         public boolean adventure(CommandContext context, String player) throws MissingPermissionCommandException, CommandException {
             return changeGameMode(context, player, GameMode.ADVENTURE, SwitchGameModePermissions.ADVENTURE);
+        }
+        @IsCommand("spectator")
+        @Alias("sp")
+        @Description(value = "command.switch.spectator", translate = true)
+        @NeedsPermission(value={"spectator", "backonly"}, optional = true)
+        @Usages("[player]")
+        public boolean spectator(CommandContext context, String player) throws MissingPermissionCommandException, CommandException {
+            return changeGameMode(context, player, GameMode.SPECTATOR, SwitchGameModePermissions.SPECTATOR);
         }
         
         @Override
