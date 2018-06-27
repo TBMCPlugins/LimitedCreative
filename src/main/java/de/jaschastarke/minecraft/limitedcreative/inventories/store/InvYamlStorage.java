@@ -43,7 +43,7 @@ public class InvYamlStorage extends InvConfStorage {
     
     @Override
     public void load(Inventory pinv, Target target) {
-        load(pinv, YamlConfiguration.loadConfiguration(getFile(pinv, target)));
+        load(pinv, YamlConfiguration.loadConfiguration(getFile(pinv, target, false)));
     }
     
     @Override
@@ -52,7 +52,11 @@ public class InvYamlStorage extends InvConfStorage {
         yml.options().header("DO NOT MODIFY THIS FILE");
         store(pinv, yml);
         try {
-            yml.save(getFile(pinv, target));
+            File nameFile=getFile(pinv, target, false);
+            File uuidFile=getFile(pinv, target, true);
+            if(!nameFile.equals(uuidFile)) //It'd be recreated right after, still, don't remove if the same
+                nameFile.delete(); //Delete file with name so it doesn't get loaded again
+            yml.save(uuidFile);
         } catch (IOException e) {
             mod.getLog().warn("Failed to save Inventory for Player " + pinv.getPlayer().getName());
             e.printStackTrace();
@@ -61,19 +65,28 @@ public class InvYamlStorage extends InvConfStorage {
 
     @Override
     public void remove(Inventory pinv, Target target) {
-        getFile(pinv, target).delete();
+        getFile(pinv, target, true).delete();
     }
 
     @Override
     public boolean contains(Inventory pinv, Target target) {
-        return getFile(pinv, target).exists();
+        return getFile(pinv, target, false).exists();
     }
     
-    protected File getFile(Inventory pinv, Target target) {
-        if (target != default_target) {
-            return new File(dir, pinv.getPlayer().getUniqueId() + "_" + target.toString().toLowerCase() + SUFFIX);
-        } else {
-            return new File(dir, pinv.getPlayer().getUniqueId() + SUFFIX);
-        }
+    protected File getFile(Inventory pinv, Target target, boolean uuidonly) {
+        File file;
+        String player;
+        do {
+            player = uuidonly ? pinv.getPlayer().getUniqueId().toString() : pinv.getPlayer().getName();
+            if (target != default_target) {
+                file = new File(dir, player + "_" + target.toString().toLowerCase() + SUFFIX);
+            } else {
+                file = new File(dir, player + SUFFIX);
+            }
+            if(uuidonly)
+                return file; //Use file with UUID, even if doesn't exist
+            uuidonly = true; //Run again with UUID, then return...
+        } while(!file.exists()); //...if the file with name is not found
+        return file; //Found file with player name
     }
 }
