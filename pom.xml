@@ -8,8 +8,8 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <plib.version>1.7.0</plib.version>
-    <bukkit.version>1.9.4-R0.1-SNAPSHOT</bukkit.version>
+    <plib.version>1.4-SNAPSHOT</plib.version>
+    <bukkit.version>1.12.2-R0.1-SNAPSHOT</bukkit.version>
   </properties>
   
   <scm>
@@ -49,7 +49,7 @@
     <!-- Official WorldGuard and WorldEdit repository -->
     <repository>
       <id>sk89q-mvn2</id>
-      <url>http://mvn2.sk89q.com/repo</url>
+      <url>http://maven.sk89q.com/repo</url>
     </repository>
     <!-- Official Multiverse repository -->
     <repository>
@@ -94,6 +94,12 @@
         <version>6.1</version>
     </dependency>
     <dependency>
+        <!-- http://dev.bukkit.org/server-mods/worldguard/ -->
+        <groupId>com.sk89q</groupId>
+        <artifactId>worldedit</artifactId>
+        <version>6.0.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
         <!-- http://dev.bukkit.org/server-mods/authme-reloaded/ -->
         <groupId>uk.org.whoami</groupId>
         <artifactId>authme</artifactId>
@@ -128,6 +134,12 @@
         <groupId>net.coreprotect</groupId>
         <artifactId>coreprotect</artifactId>
         <version>2.0.8</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.avaje/ebean -->
+    <dependency>
+        <groupId>org.avaje</groupId>
+        <artifactId>ebean</artifactId>
+        <version>2.7.3</version>
     </dependency>
   </dependencies>
   
