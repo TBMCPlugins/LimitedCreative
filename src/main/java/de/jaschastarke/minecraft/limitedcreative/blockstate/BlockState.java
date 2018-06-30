@@ -82,8 +82,14 @@ public class BlockState {
     }
     
     //TODO Rename
-    public void setPlayerName(String s) {
-        uuid = UUID.fromString(s);
+    @SuppressWarnings("deprecation")
+    public void setPlayerNameOrUUID(String s) {
+        if(s==null)
+            uuid=null;
+        else if(!s.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"))
+            uuid = Bukkit.getOfflinePlayer(s).getUniqueId(); //If it's a name, get UUID
+        else
+            uuid = UUID.fromString(s);
     }
     
     public OfflinePlayer getPlayer() {
@@ -115,7 +121,7 @@ public class BlockState {
 
     public void setSource(Source source) {
         if (source != Source.PLAYER && source != Source.EDIT && source != Source.COMMAND)
-            setPlayerName(null);
+            setPlayerNameOrUUID(null);
         this.source = source;
     }
     

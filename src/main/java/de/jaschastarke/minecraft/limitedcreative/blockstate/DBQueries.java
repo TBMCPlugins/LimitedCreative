@@ -42,7 +42,7 @@ public class DBQueries {
             bs.setLocation(loc);
             bs.setDate(rs.getTimestamp("cdate"));
             bs.setGameMode(getGameMode(rs));
-            bs.setPlayerName(rs.getString("player"));
+            bs.setPlayerNameOrUUID(rs.getString("player"));
             bs.setSource(getSource(rs));
             rs.close();
             return bs;
@@ -72,7 +72,7 @@ public class DBQueries {
             bs.setLocation(new Location(c.getWorld(), rs.getInt("x"), rs.getInt("y"), rs.getInt("z")));
             bs.setDate(rs.getTimestamp("cdate"));
             bs.setGameMode(getGameMode(rs));
-            bs.setPlayerName(rs.getString("player"));
+            bs.setPlayerNameOrUUID(rs.getString("player"));
             bs.setSource(getSource(rs));
             blocks.add(bs);
         }
@@ -100,7 +100,7 @@ public class DBQueries {
                 bs.setLocation(new Location(c.getWorld(), rs.getInt("x"), rs.getInt("y"), rs.getInt("z")));
                 bs.setDate(rs.getTimestamp("cdate"));
                 bs.setGameMode(getGameMode(rs));
-                bs.setPlayerName(rs.getString("player"));
+                bs.setPlayerNameOrUUID(rs.getString("player"));
                 bs.setSource(getSource(rs));
                 return bs;
             }

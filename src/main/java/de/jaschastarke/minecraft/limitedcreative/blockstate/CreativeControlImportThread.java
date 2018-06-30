@@ -131,7 +131,7 @@ public class CreativeControlImportThread extends DatabaseMigrationThread {
                 bs.setLocation(new Location(c.getWorld(), rs.getInt("x"), rs.getInt("y"), rs.getInt("z")));
                 bs.setDate(new Date(rs.getLong("time")));
                 bs.setGameMode(GameMode.CREATIVE);
-                bs.setPlayerName(rs.getString("player"));
+                bs.setPlayerNameOrUUID(rs.getString("player"));
                 bs.setSource(Source.PLAYER);
                 return bs;
             }
