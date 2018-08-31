@@ -1,21 +1,20 @@
 package de.jaschastarke.minecraft.limitedcreative.blockstate.thread;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
-
+import de.jaschastarke.bukkit.lib.ModuleLogger;
+import de.jaschastarke.minecraft.limitedcreative.ModBlockStates;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.AbstractModel.HasBlockState;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.DBModel.Cuboid;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.DBQueries;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.ThreadedModel;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
-import de.jaschastarke.bukkit.lib.ModuleLogger;
-import de.jaschastarke.minecraft.limitedcreative.ModBlockStates;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.AbstractModel.HasBlockState;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.DBModel.Cuboid;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.DBQueries;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.ThreadedModel;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Stack;
 
 public class ThreadLink {
     private static final int BATCH_ACTION_LENGTH = 25;
@@ -40,6 +39,7 @@ public class ThreadLink {
          * In theory we could add multiple threads, e.g. 1 write and 2 read threads.
          */
         createThread(queries);
+        shutdown = true; //Don't allow the thread to run until it's started
     }
     
     private class DBThread extends Thread {
@@ -108,6 +108,7 @@ public class ThreadLink {
     }
     
     public void start() {
+        shutdown = false;
         if (!thread.isAlive())
             thread.start();
     }
@@ -213,14 +214,17 @@ public class ThreadLink {
     }
 
     private void restartThreadIfNeeded() {
-        if(thread.isAlive())
+        if ((thread != null && thread.isAlive()) || shutdown)
             return;
         log.warn("Thread is dead, restarting!");
+        new Exception("Thread-restarting update called").printStackTrace();
         createThread(((DBThread) thread).q);
         start();
     }
 
     private void createThread(DBQueries queries) {
+        if (shutdown)
+            return;
         thread = new DBThread(queries);
         thread.setName("LC BlockState DB-Thread");
         thread.setUncaughtExceptionHandler(new UncaughtExceptionHandler() {
