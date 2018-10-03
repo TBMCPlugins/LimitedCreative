@@ -23,10 +23,11 @@ public class ThreadLink {
     private static final int COUNT_ERROR_QUEUE = 20;
     private static final int QUEUE_TIMING_DURATION = 500; // ms
     private static final int STARTUP_TIMING = 30000; // ms
+    private static final int THREAD_SHUTDOWN_WAIT_MS = 30000;
     private long lastTimeout;
-    private Stack<Action> updateQueue = new Stack<Action>();
-    
-    private boolean shutdown = false;
+    private final Stack<Action> updateQueue = new Stack<Action>();
+
+    private boolean shutdown;
     private ModuleLogger log;
     private ThreadedModel model;
     private Thread thread;
@@ -85,6 +86,7 @@ public class ThreadLink {
                     for (Action act : acts) {
                         if (!shutdown || !(act instanceof CacheChunkAction)) {
                             if (act instanceof CallableAction) {
+                                //noinspection SynchronizationOnLocalVariableOrMethodParameter
                                 synchronized (act) {
                                     act.process(ThreadLink.this, this.q);
                                     act.notify();
@@ -98,7 +100,7 @@ public class ThreadLink {
                         log.debug("DB-Thread '" + Thread.currentThread().getName() + "' execution time: " + (System.currentTimeMillis() - t) + "ms");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    log.severe("DB-Thread '" + Thread.currentThread().getName() + "' was harmfull interupted");
+                    log.severe("DB-Thread '" + Thread.currentThread().getName() + "' was harmfully interupted");
                 }
                 Thread.yield();
             }
@@ -106,7 +108,7 @@ public class ThreadLink {
                 log.debug("DB-Thread " + Thread.currentThread().getName() + " finished.");
         }
     }
-    
+
     public void start() {
         shutdown = false;
         if (!thread.isAlive())
@@ -119,11 +121,11 @@ public class ThreadLink {
         long l = System.currentTimeMillis();
         synchronized (updateQueue) {
             updateQueue.add(new UpdateBlockStateAction(block));
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
         long l2 = System.currentTimeMillis();
         if (l2 - l > QUEUE_ACCESS_WARNING_DURATION) {
-            getLog().warn("queueUpdate-action took to long: " + (l - 2) + "ms");
+            getLog().warn("queueUpdate-action took too long: " + (l2 - l) + "ms");
         }
     }
     
@@ -132,7 +134,7 @@ public class ThreadLink {
         FetchBlockStateAction action = new FetchBlockStateAction(block);
         synchronized (updateQueue) {
             updateQueue.push(action);
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
         return action.getValue();
     }
@@ -141,14 +143,14 @@ public class ThreadLink {
         restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(act);
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
     }
     public <T> T call(CallableAction<T> act) {
         restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.push(act);
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
         return act.getValue();
     }
@@ -157,7 +159,7 @@ public class ThreadLink {
         FetchCuboidAction action = new FetchCuboidAction(c);
         synchronized (updateQueue) {
             updateQueue.push(action);
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
         return action.getValue();
     }
@@ -166,7 +168,7 @@ public class ThreadLink {
         restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(new MoveBlockStateAction(from, to));
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
     }
 
@@ -174,7 +176,7 @@ public class ThreadLink {
         restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(new CacheChunkAction(chunk));
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
     }
 
@@ -182,17 +184,18 @@ public class ThreadLink {
         restartThreadIfNeeded();
         synchronized (updateQueue) {
             updateQueue.add(transaction);
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
     }
 
     public void shutdown() throws InterruptedException {
-        restartThreadIfNeeded();
         synchronized (updateQueue) {
             shutdown = true;
-            updateQueue.notify();
+            updateQueue.notifyAll();
         }
-        thread.join();
+        thread.join(THREAD_SHUTDOWN_WAIT_MS);
+        if (thread.isAlive())
+            thread.interrupt(); //Wake it up
     }
 
     public HasBlockState getMetaState(Block block) {
