@@ -1,21 +1,20 @@
 package de.jaschastarke.minecraft.limitedcreative.blockstate.worldedit;
 
-import java.util.Date;
-
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.extent.AbstractDelegateExtent;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.world.block.BlockStateHolder;
+import de.jaschastarke.minecraft.limitedcreative.ModBlockStates;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState;
+import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState.Source;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.extent.Extent;
-import com.sk89q.worldedit.extent.logging.AbstractLoggingExtent;
+import java.util.Date;
 
-import de.jaschastarke.minecraft.limitedcreative.ModBlockStates;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState;
-import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState.Source;
-
-public class EditSessionExtent extends AbstractLoggingExtent {
+public class EditSessionExtent extends AbstractDelegateExtent {
     private ModBlockStates mod;
     private Player player = null;
     private World world;
@@ -30,14 +29,15 @@ public class EditSessionExtent extends AbstractLoggingExtent {
     /**
      * Called when a block is being changed.
      *
-     * @param position the position
+     * @param pt the position
      * @param newBlock the new block to replace the old one
      */
-    protected void onBlockChange(Vector pt, BaseBlock newBlock) {
+    @Override
+    public <T extends BlockStateHolder<T>> boolean setBlock(BlockVector3 pt, T newBlock) throws WorldEditException {
         if (mod.isDebug())
             mod.getLog().debug("WorldEdit-Integration: BlockChange: "+pt.toString()+" BB: " + newBlock.toString());
         Location loc = new Location(world, pt.getBlockX(), pt.getBlockY(), pt.getBlockZ());
-        if (newBlock.getType() == 0) {
+        if (newBlock.getBlockType().getMaterial().isAir()) {
             mod.getModel().removeState(loc.getBlock());
         } else {
             BlockState s = mod.getModel().getState(loc.getBlock());
@@ -54,5 +54,6 @@ public class EditSessionExtent extends AbstractLoggingExtent {
             
             mod.getModel().setState(s);
         }
+        return true;
     }
 }

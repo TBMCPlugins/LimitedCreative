@@ -1,31 +1,19 @@
 package de.jaschastarke.minecraft.limitedcreative.regions;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.World;
-
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
+import com.sk89q.worldguard.protection.regions.RegionContainer;
 import de.jaschastarke.LocaleString;
 import de.jaschastarke.bukkit.lib.chat.ChatFormattings;
-import de.jaschastarke.bukkit.lib.commands.BukkitCommand;
-import de.jaschastarke.bukkit.lib.commands.CommandContext;
-import de.jaschastarke.bukkit.lib.commands.CommandException;
-import de.jaschastarke.bukkit.lib.commands.HelpCommand;
-import de.jaschastarke.bukkit.lib.commands.ICommand;
-import de.jaschastarke.bukkit.lib.commands.IHelpDescribed;
-import de.jaschastarke.bukkit.lib.commands.MethodCommand;
-import de.jaschastarke.bukkit.lib.commands.MissingPermissionCommandException;
+import de.jaschastarke.bukkit.lib.commands.*;
 import de.jaschastarke.bukkit.lib.commands.annotations.IsCommand;
 import de.jaschastarke.bukkit.lib.commands.annotations.Usages;
 import de.jaschastarke.bukkit.lib.commands.parser.DefinedParameterParser;
@@ -40,6 +28,13 @@ import de.jaschastarke.minecraft.limitedcreative.regions.worldguard.FlagList;
 import de.jaschastarke.minecraft.limitedcreative.regions.worldguard.FlagValue;
 import de.jaschastarke.minecraft.limitedcreative.regions.worldguard.Region;
 import de.jaschastarke.modularize.ModuleEntry.ModuleState;
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.World;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * LimitedCreative-Region-Command: configure creative regions
@@ -138,7 +133,8 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
             if (idx > -1 && context.getArgument(idx) != null)
                 w = Bukkit.getWorld(context.getArgument(idx));
             if (w != null) {
-                RegionManager mgr = getWorldGuard().getRegionManager(w);
+                RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+                RegionManager mgr = container.get(BukkitAdapter.adapt(w));
                 if (mgr != null) {
                     List<String> hints = new ArrayList<String>();
                     for (String rId : mgr.getRegions().keySet()) {
@@ -173,8 +169,9 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
             w = mod.getPlugin().getServer().getWorld(params.getParameter("-w"));
         if (w == null)
             throw new CommandException(L("command.worldguard.world_not_found"));
-        
-        RegionManager mgr = getWorldGuard().getRegionManager(w);
+
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        RegionManager mgr = container.get(BukkitAdapter.adapt(w));
         ProtectedRegion region = mgr.getRegion(params.getArgument(0));
         if (region == null && params.getArgument(0).equalsIgnoreCase("__global__")) {
             region = new GlobalProtectedRegion(params.getArgument(0));
@@ -202,7 +199,7 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
         String value = params.getValue();
         try {
             if (value != null && value.trim().length() > 0) {
-                reg.setFlag(flag, flag.parseInput(getWorldGuard(), context.getSender(), value));
+                reg.setFlag(flag, flag.parseInput(FlagContext.create().setInput(value).build()));
             } else {
                 reg.setFlag(flag, null);
             }
@@ -237,17 +234,18 @@ public class RegionsCommand extends BukkitCommand implements IHelpDescribed {
             throw new CommandException(L("command.worldguard.world_not_found"));
         
         ProtectedRegion region = null;
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         if (params.getArgumentCount() == 0 && context.isPlayer()) {
-            RegionManager mgr = getWorldGuard().getRegionManager(context.getPlayer().getWorld());
-            ApplicableRegionSet set = mgr.getApplicableRegions(context.getPlayer().getLocation());
+            RegionManager mgr = container.get(BukkitAdapter.adapt(context.getPlayer().getWorld()));
+            ApplicableRegionSet set = mgr.getApplicableRegions(BukkitAdapter.asBlockVector(context.getPlayer().getLocation()));
             if (set.size() > 0) {
                 region = set.iterator().next();
             } else {
-                region = getWorldGuard().getRegionManager(w).getRegion(GLOBAL_REGION);
+                region = container.get(BukkitAdapter.adapt(w)).getRegion(GLOBAL_REGION);
             }
         } else {
             int rpc = params.getArgumentCount() > 1 ? 1 : 0;
-            RegionManager mgr = getWorldGuard().getRegionManager(w);
+            RegionManager mgr = container.get(BukkitAdapter.adapt(w));
             region = mgr.getRegion(params.getArgument(rpc));
             if (region == null && params.getArgument(rpc).equalsIgnoreCase(GLOBAL_REGION)) {
                 region = new GlobalProtectedRegion(params.getArgument(rpc));

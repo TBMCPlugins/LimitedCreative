@@ -1,12 +1,10 @@
 package de.jaschastarke.minecraft.limitedcreative.regions;
 
-import org.bukkit.GameMode;
-import org.bukkit.command.CommandSender;
-
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
+import org.bukkit.GameMode;
 
 /**
  * Well, that was an interesting idea, but it doesn't work.
@@ -17,7 +15,8 @@ public class GameModeFlag extends Flag<GameMode> {
     }
     
     @Override
-    public GameMode parseInput(WorldGuardPlugin plugin, CommandSender sender, String input) throws InvalidFlagFormat {
+    public GameMode parseInput(FlagContext context) throws InvalidFlagFormat {
+        String input = context.getUserInput();
         input = input.trim();
         if (input.equalsIgnoreCase("creative")) {
             return GameMode.CREATIVE;

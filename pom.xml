@@ -49,7 +49,7 @@
     <!-- Official WorldGuard and WorldEdit repository -->
     <repository>
       <id>sk89q-mvn2</id>
-      <url>http://maven.sk89q.com/repo</url>
+        <url>https://maven.enginehub.org/repo/</url>
     </repository>
     <!-- Official Multiverse repository -->
     <repository>
@@ -81,23 +81,29 @@
         <artifactId>plib</artifactId>
         <version>${plib.version}</version>
     </dependency>
+      <dependency>
+          <!-- http://dl.bukkit.org/ -->
+          <groupId>org.bukkit</groupId>
+          <artifactId>bukkit</artifactId>
+          <version>${bukkit.version}</version>
+      </dependency>
+      <dependency>
+          <!-- http://dl.bukkit.org/ -->
+          <groupId>org.bukkit.</groupId> <!-- Needed for WE integration -->
+          <artifactId>bukkit</artifactId>
+          <version>1.14.4-R0.1-SNAPSHOT</version>
+      </dependency>
     <dependency>
-        <!-- http://dl.bukkit.org/ -->
-        <groupId>org.bukkit</groupId>
-        <artifactId>bukkit</artifactId>
-        <version>${bukkit.version}</version>
+        <!-- http://dev.bukkit.org/server-mods/worldguard/ -->
+        <groupId>com.sk89q.worldguard</groupId>
+        <artifactId>worldguard-bukkit</artifactId>
+        <version>7.0.0</version>
     </dependency>
     <dependency>
         <!-- http://dev.bukkit.org/server-mods/worldguard/ -->
-        <groupId>com.sk89q</groupId>
-        <artifactId>worldguard</artifactId>
-        <version>6.1</version>
-    </dependency>
-    <dependency>
-        <!-- http://dev.bukkit.org/server-mods/worldguard/ -->
-        <groupId>com.sk89q</groupId>
-        <artifactId>worldedit</artifactId>
-        <version>6.0.0-SNAPSHOT</version>
+        <groupId>com.sk89q.worldedit</groupId>
+        <artifactId>worldedit-bukkit</artifactId>
+        <version>7.0.0</version>
     </dependency>
     <dependency>
         <!-- http://dev.bukkit.org/server-mods/authme-reloaded/ -->

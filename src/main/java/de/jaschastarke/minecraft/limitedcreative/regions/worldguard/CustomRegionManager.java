@@ -17,14 +17,16 @@
  */
 package de.jaschastarke.minecraft.limitedcreative.regions.worldguard;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import de.jaschastarke.minecraft.limitedcreative.ModRegions;
+import de.jaschastarke.minecraft.limitedcreative.regions.WorldGuardIntegration;
+import de.jaschastarke.utils.StringUtil;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -32,15 +34,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import com.sk89q.worldguard.bukkit.BukkitUtil;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.flags.Flag;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-
-import de.jaschastarke.minecraft.limitedcreative.ModRegions;
-import de.jaschastarke.minecraft.limitedcreative.regions.WorldGuardIntegration;
-import de.jaschastarke.utils.StringUtil;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 public class CustomRegionManager {
     protected YamlConfiguration c;
@@ -161,12 +157,13 @@ public class CustomRegionManager {
     }
 
     public RegionManager getWGManager(World world) {
-        return getWorldGuard().getRegionManager(world);
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        return container.get(BukkitAdapter.adapt(world));
     }
     
     public String getRegionsHash(Location loc) {
         StringBuilder hash = new StringBuilder(loc.getWorld().getName());
-        List<String> idlist = getWGManager(loc.getWorld()).getApplicableRegionsIDs(BukkitUtil.toVector(loc));
+        List<String> idlist = getWGManager(loc.getWorld()).getApplicableRegionsIDs(BukkitAdapter.asBlockVector(loc));
         if (idlist.size() > 0) {
             hash.append("#");
             String[] ids = idlist.toArray(new String[idlist.size()]);
@@ -179,7 +176,7 @@ public class CustomRegionManager {
     }
     
     public ApplicableRegions getRegionSet(Location loc) {
-        return new ApplicableRegions(getWGManager(loc.getWorld()).getApplicableRegions(loc), this.world(loc.getWorld()));
+        return new ApplicableRegions(getWGManager(loc.getWorld()).getApplicableRegions(BukkitAdapter.asBlockVector(loc)), this.world(loc.getWorld()));
     }
 
     public ApplicableRegions getRegionSet(Block block) {

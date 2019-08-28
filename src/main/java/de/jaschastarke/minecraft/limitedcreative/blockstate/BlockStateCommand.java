@@ -1,23 +1,14 @@
 package de.jaschastarke.minecraft.limitedcreative.blockstate;
 
-import java.util.Date;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import com.sk89q.worldedit.bukkit.WorldEditPlugin;
-import com.sk89q.worldedit.bukkit.selections.Selection;
-
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
 import de.jaschastarke.LocaleString;
 import de.jaschastarke.bukkit.lib.chat.ChatFormattings;
-import de.jaschastarke.bukkit.lib.commands.BukkitCommand;
-import de.jaschastarke.bukkit.lib.commands.CommandContext;
-import de.jaschastarke.bukkit.lib.commands.CommandException;
-import de.jaschastarke.bukkit.lib.commands.HelpCommand;
-import de.jaschastarke.bukkit.lib.commands.IHelpDescribed;
-import de.jaschastarke.bukkit.lib.commands.MissingPermissionCommandException;
+import de.jaschastarke.bukkit.lib.commands.*;
 import de.jaschastarke.bukkit.lib.commands.annotations.IsCommand;
 import de.jaschastarke.bukkit.lib.commands.annotations.Usages;
 import de.jaschastarke.bukkit.lib.commands.parser.DefinedParameterParser;
@@ -32,6 +23,11 @@ import de.jaschastarke.minecraft.limitedcreative.blockstate.BlockState.Source;
 import de.jaschastarke.minecraft.limitedcreative.blockstate.DBModel.Cuboid;
 import de.jaschastarke.minecraft.limitedcreative.blockstate.DBModel.DBTransaction;
 import de.jaschastarke.modularize.ModuleEntry.ModuleState;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+
+import java.util.Date;
 
 /**
  * LimitedCreative-BlockState-Command: modify blockstate database to prevent drops of selected blocks (requires WorldEdit)
@@ -154,17 +150,22 @@ public class BlockStateCommand extends BukkitCommand implements IHelpDescribed {
         else {
             return false;
         }
-        
-        WorldEditPlugin we = (WorldEditPlugin) mod.getPlugin().getServer().getPluginManager().getPlugin("WorldEdit");
-        final Selection selection = we.getSelection(context.getPlayer());
-        
+
+        BukkitPlayer bp = BukkitAdapter.adapt(context.getPlayer());
+        Region region = null;
+        try {
+            region = WorldEdit.getInstance().getSessionManager().get(bp).getSelection(bp.getWorld());
+        } catch (Exception ignored) { //IncompleteRegionException
+        }
+
+        final Region selection = region;
         if (selection == null) {
             context.response(L("command.blockstate.worledit_selection_empty"));
             return true;
         }
 
-        final Location min = selection.getMinimumPoint();
-        final Location max = selection.getMaximumPoint();
+        final BlockVector3 min = selection.getMinimumPoint();
+        final BlockVector3 max = selection.getMaximumPoint();
         
         mod.getPlugin().getServer().getScheduler().runTaskAsynchronously(mod.getPlugin(), new Runnable() {
             @Override
@@ -174,10 +175,12 @@ public class BlockStateCommand extends BukkitCommand implements IHelpDescribed {
                 DBTransaction update = mod.getModel().groupUpdate();
                 int count = 0;
                 World w = selection.getWorld();
+                assert w != null;
+                org.bukkit.World bw = BukkitAdapter.adapt(w);
                 
                 Cuboid c = new Cuboid();
-                c.add(min);
-                c.add(max);
+                c.add(new Location(bw, min.getBlockX(), min.getBlockY(), min.getBlockZ()));
+                c.add(new Location(bw, max.getBlockX(), max.getBlockY(), max.getBlockZ()));
                 mod.getModel().cacheStates(c);
                 
                 BlockState seed = new BlockState();
@@ -188,9 +191,9 @@ public class BlockStateCommand extends BukkitCommand implements IHelpDescribed {
                 for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
                     for (int y = min.getBlockY(); y <= max.getBlockY(); y++) {
                         for (int z = min.getBlockZ(); z <= max.getBlockZ(); z++) {
-                            Location loc = new Location(w, x, y, z);
-                            if (w.getBlockAt(loc).getType() != Material.AIR && selection.contains(loc)) {
-                                seed.setLocation(loc);
+                            BlockVector3 loc = BlockVector3.at(x, y, z);
+                            if (!w.getBlock(loc).getBlockType().getMaterial().isAir() && selection.contains(loc)) {
+                                seed.setLocation(new Location(bw, x, y, z));
                                 update.setState(new BlockState(seed));
                                 count++;
                             }
