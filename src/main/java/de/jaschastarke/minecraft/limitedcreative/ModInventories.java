@@ -1,23 +1,18 @@
 package de.jaschastarke.minecraft.limitedcreative;
 
-import java.io.File;
-import java.util.Map;
-import java.util.WeakHashMap;
-
+import de.jaschastarke.bukkit.lib.CoreModule;
+import de.jaschastarke.minecraft.limitedcreative.inventories.*;
+import de.jaschastarke.minecraft.limitedcreative.inventories.store.PlayerInventoryStorage;
+import de.jaschastarke.minecraft.limitedcreative.inventories.store.ReflectionStorage;
+import de.jaschastarke.modularize.IModule;
+import de.jaschastarke.modularize.ModuleEntry;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import de.jaschastarke.bukkit.lib.CoreModule;
-import de.jaschastarke.minecraft.limitedcreative.inventories.ArmoryConfig;
-import de.jaschastarke.minecraft.limitedcreative.inventories.Inventory;
-import de.jaschastarke.minecraft.limitedcreative.inventories.InventoryConfig;
-import de.jaschastarke.minecraft.limitedcreative.inventories.InventoryPermissions;
-import de.jaschastarke.minecraft.limitedcreative.inventories.PlayerListener;
-import de.jaschastarke.minecraft.limitedcreative.inventories.store.InvYamlStorage;
-import de.jaschastarke.minecraft.limitedcreative.inventories.store.PlayerInventoryStorage;
-import de.jaschastarke.modularize.IModule;
-import de.jaschastarke.modularize.ModuleEntry;
+import java.io.File;
+import java.util.Map;
+import java.util.WeakHashMap;
 
 public class ModInventories extends CoreModule<LimitedCreative> {
     protected PlayerInventoryStorage storage;
@@ -57,7 +52,8 @@ public class ModInventories extends CoreModule<LimitedCreative> {
             throw new IllegalAccessError(plugin.getLocale().trans("inventory.warning.conflict", incomp, this.getName()));
         }
         super.onEnable();
-        storage = new InvYamlStorage(this, new File(plugin.getDataFolder(), config.getFolder()));
+        //storage = new InvYamlStorage(this, new File(plugin.getDataFolder(), config.getFolder()));
+        storage = new ReflectionStorage(this, new File(plugin.getDataFolder(), config.getFolder()));
         inventories = new WeakHashMap<Player, Inventory>();
         getLog().info(plugin.getLocale().trans("basic.loaded.module"));
     }
