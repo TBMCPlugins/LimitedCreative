@@ -28,7 +28,6 @@ public class ModInventories extends CoreModule<LimitedCreative> {
         return "Inventory";
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void initialize(ModuleEntry<IModule> entry) {
         super.initialize(entry);

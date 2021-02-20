@@ -1,13 +1,12 @@
 package de.jaschastarke.minecraft.limitedcreative;
 
-import org.bukkit.Bukkit;
-
 import de.jaschastarke.hooking.BooleanHooker;
 import de.jaschastarke.hooking.GetHooker;
 import de.jaschastarke.minecraft.limitedcreative.hooks.MultiVerseHooks;
 import de.jaschastarke.minecraft.limitedcreative.hooks.PlayerCheckHooker;
 import de.jaschastarke.minecraft.limitedcreative.hooks.WorldTypeHooker;
 import de.jaschastarke.minecraft.limitedcreative.hooks.xAuthHooks;
+import org.bukkit.Bukkit;
 
 public final class Hooks {
     public static PlayerCheckHooker IsLoggedIn = new PlayerCheckHooker(true);
@@ -53,7 +52,8 @@ public final class Hooks {
     public static boolean isAuthMePresent() {
         if (isPluginEnabled("AuthMe")) {
             try {
-                return Class.forName("uk.org.whoami.authme.api.API") != null;
+                Class.forName("uk.org.whoami.authme.api.API");
+                return true;
             } catch (ClassNotFoundException e) {
                 return false;
             }
@@ -64,7 +64,8 @@ public final class Hooks {
     public static boolean isXAuth20Present() {
         if (isPluginEnabled("xAuth")) {
             try {
-                return Class.forName("com.cypherx.xauth.xAuth") != null;
+                Class.forName("com.cypherx.xauth.xAuth");
+                return true;
             } catch (ClassNotFoundException e) {
                 return false;
             }

@@ -18,7 +18,7 @@ public class EditSessionExtent extends AbstractDelegateExtent {
     private ModBlockStates mod;
     private Player player = null;
     private World world;
-    
+
     public EditSessionExtent(Extent extent, ModBlockStates mod, Player player, World world) {
         super(extent);
         this.mod = mod;
@@ -29,13 +29,13 @@ public class EditSessionExtent extends AbstractDelegateExtent {
     /**
      * Called when a block is being changed.
      *
-     * @param pt the position
+     * @param pt       the position
      * @param newBlock the new block to replace the old one
      */
     @Override
     public <T extends BlockStateHolder<T>> boolean setBlock(BlockVector3 pt, T newBlock) throws WorldEditException {
         if (mod.isDebug())
-            mod.getLog().debug("WorldEdit-Integration: BlockChange: "+pt.toString()+" BB: " + newBlock.toString());
+            mod.getLog().debug("WorldEdit-Integration: BlockChange: " + pt.toString() + " BB: " + newBlock.toString());
         Location loc = new Location(world, pt.getBlockX(), pt.getBlockY(), pt.getBlockZ());
         if (newBlock.getBlockType().getMaterial().isAir()) {
             mod.getModel().removeState(loc.getBlock());
@@ -51,9 +51,10 @@ public class EditSessionExtent extends AbstractDelegateExtent {
             s.setSource(Source.EDIT);
             if (mod.isDebug())
                 mod.getLog().debug("WorldEdit-Integration: Saving BlockState: " + s.toString());
-            
+
             mod.getModel().setState(s);
         }
+        super.setBlock(pt, newBlock);
         return true;
     }
 }

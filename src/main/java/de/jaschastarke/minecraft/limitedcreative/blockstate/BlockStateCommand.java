@@ -166,44 +166,41 @@ public class BlockStateCommand extends BukkitCommand implements IHelpDescribed {
 
         final BlockVector3 min = selection.getMinimumPoint();
         final BlockVector3 max = selection.getMaximumPoint();
-        
-        mod.getPlugin().getServer().getScheduler().runTaskAsynchronously(mod.getPlugin(), new Runnable() {
-            @Override
-            public void run() {
-                if (mod.isDebug())
-                    mod.getLog().debug("Scheduler: Asynchronous Task run");
-                DBTransaction update = mod.getModel().groupUpdate();
-                int count = 0;
-                World w = selection.getWorld();
-                assert w != null;
-                org.bukkit.World bw = BukkitAdapter.adapt(w);
-                
-                Cuboid c = new Cuboid();
-                c.add(new Location(bw, min.getBlockX(), min.getBlockY(), min.getBlockZ()));
-                c.add(new Location(bw, max.getBlockX(), max.getBlockY(), max.getBlockZ()));
-                mod.getModel().cacheStates(c);
-                
-                BlockState seed = new BlockState();
-                seed.setPlayer(context.getPlayer());
-                seed.setGameMode(tgm);
-                seed.setSource(Source.COMMAND);
-                seed.setDate(new Date());
-                for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
-                    for (int y = min.getBlockY(); y <= max.getBlockY(); y++) {
-                        for (int z = min.getBlockZ(); z <= max.getBlockZ(); z++) {
-                            BlockVector3 loc = BlockVector3.at(x, y, z);
-                            if (!w.getBlock(loc).getBlockType().getMaterial().isAir() && selection.contains(loc)) {
-                                seed.setLocation(new Location(bw, x, y, z));
-                                update.setState(new BlockState(seed));
-                                count++;
-                            }
+
+        mod.getPlugin().getServer().getScheduler().runTaskAsynchronously(mod.getPlugin(), () -> {
+            if (mod.isDebug())
+                mod.getLog().debug("Scheduler: Asynchronous Task run");
+            DBTransaction update = mod.getModel().groupUpdate();
+            int count = 0;
+            World w = selection.getWorld();
+            assert w != null;
+            org.bukkit.World bw = BukkitAdapter.adapt(w);
+
+            Cuboid c = new Cuboid();
+            c.add(new Location(bw, min.getBlockX(), min.getBlockY(), min.getBlockZ()));
+            c.add(new Location(bw, max.getBlockX(), max.getBlockY(), max.getBlockZ()));
+            mod.getModel().cacheStates(c);
+
+            BlockState seed = new BlockState();
+            seed.setPlayer(context.getPlayer());
+            seed.setGameMode(tgm);
+            seed.setSource(Source.COMMAND);
+            seed.setDate(new Date());
+            for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
+                for (int y = min.getBlockY(); y <= max.getBlockY(); y++) {
+                    for (int z = min.getBlockZ(); z <= max.getBlockZ(); z++) {
+                        BlockVector3 loc = BlockVector3.at(x, y, z);
+                        if (!w.getBlock(loc).getBlockType().getMaterial().isAir() && selection.contains(loc)) {
+                            seed.setLocation(new Location(bw, x, y, z));
+                            update.setState(new BlockState(seed));
+                            count++;
                         }
                     }
                 }
-                update.finish();
-                
-                context.response(L("command.blockstate.command_updated", count));
             }
+            update.finish();
+
+            context.response(L("command.blockstate.command_updated", count));
         });
         return true;
     }
