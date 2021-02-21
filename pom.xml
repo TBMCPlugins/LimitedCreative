@@ -4,7 +4,7 @@
     <groupId>de.jaschastarke</groupId>
     <artifactId>LimitedCreative</artifactId>
     <name>LimitedCreative</name>
-    <version>2.5-SNAPSHOT</version>
+    <version>2.5</version>
     <url>https://github.com/possi/LimitedCreative</url>
 
     <properties>
@@ -163,6 +163,12 @@
             <artifactId>ebean</artifactId>
             <version>2.7.3</version>
         </dependency>
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>2.2.1</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -173,7 +179,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.8.1</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
@@ -218,7 +224,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.0</version>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -230,6 +236,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>de.jaschastarke:plib</include>
+                                    <include>org.bstats</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -241,6 +248,12 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>de.jaschastarke.minecraft.limitedcreative.bstats</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
@@ -269,7 +282,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore></ignore>
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
